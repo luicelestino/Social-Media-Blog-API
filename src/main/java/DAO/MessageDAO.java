@@ -65,7 +65,33 @@ public class MessageDAO {
     }
 
     // Retrieve a message by its ID
+    public Message getMessageByID(int messageID) {
+        // Establish connection to database
+        Connection connection = ConnectionUtil.getConnection();
 
+        try {
+            // Prepare SQL statement
+            String sql = "SELECT * FROM message WHERE message_id = ?";
+
+            // Write prepared statement to execute SQL query
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            // Use prepared statement setter to set parameter
+            preparedStatement.setInt(1, messageID);
+
+            // Create result set to store the results of the SQL query
+            ResultSet rs = preparedStatement.executeQuery();
+
+            // Parse SQL data into an object
+            while(rs.next()) {
+                Message message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"),
+                                              rs.getLong("time_posted_epoch"));
+                return message;
+            }
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+        } return null;
+    }
 
     // Delete a message by its ID
 
