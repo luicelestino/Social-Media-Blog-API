@@ -94,9 +94,38 @@ public class MessageDAO {
     }
 
     // Delete a message by its ID
+    public boolean deleteMessageByID(int message_id) {
+        // Establish connection to database
+        Connection connection = ConnectionUtil.getConnection();
+
+        try {
+            // Prepare SQL statement
+            String sql = "DELETE * FROM message WHERE message_id = ?";
+            
+            // Create prepared statement that will execute the SQL query
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            // Use prepared statement setters to set parameter
+            preparedStatement.setInt(1, message_id);
+
+            // Execute the prepared statement
+            // Save the number of rows affected by SQL query to determine if delete was successful or not i.e 0 rows vs 1 row
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if (rowsAffected > 0) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        } 
+    }
 
 
     // Update a message's "message_txt" by its ID
+
 
     // Retrieve all messages written by a particular user identified by their "account_id"
 }
