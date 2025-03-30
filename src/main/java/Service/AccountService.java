@@ -43,5 +43,21 @@ public class AccountService {
 
         return accountDAO.registerAccount(account);
     }
+
+    // Use AccountDAO to login to an account
+    // Implement business logic here 
+    // Account can only be logged into if the username and password are a match
+    public Account loginAccount(Account account) {
+
+        // Retrieve account by username from the database
+        Account existingAccount = accountDAO.getAccountByUsername(account.getUsername());
+        
+        // Check if the account exists and the passwords match
+        if (existingAccount != null && existingAccount.getPassword().equals(account.getPassword())) {
+            return existingAccount;
+        }
+        // Return null if no existing account was found
+        return null;
+    }
 }
     
