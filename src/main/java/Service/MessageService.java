@@ -19,6 +19,11 @@ public class MessageService {
         this.messageDAO = messageDAO;
     }
 
+    // Use MessageDAO to create new message
+    public Message addMessage(Message message) {
+        return messageDAO.createMessage(message);
+    }
+
     // Use MessageDAO to retrieve all messages
     public List<Message> getAllMessages() {
         return messageDAO.getAllMessages();
