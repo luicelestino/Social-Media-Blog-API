@@ -43,10 +43,12 @@ public class MessageService {
     public boolean updateMessageByID(String message_text, int message_id) {
 
         // Check to see if message exists as per business logic requirements
-        // Find message bu accessing MessageDAO method
+        // Find message by accessing MessageDAO method
         Message messageExists = messageDAO.getMessageByID(message_id);
+        // String newMessageText = message_text;
 
         if (messageExists != null) {
+            // messageExists.setMessage_text(newMessageText);
             return messageDAO.updateMessageByID(message_text, message_id);
         }
         // Return null if no message was found

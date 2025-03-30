@@ -5,6 +5,9 @@ import io.javalin.http.Context;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import Model.Account;
 import Model.Message;
 import Service.AccountService;
@@ -12,6 +15,7 @@ import Service.MessageService;
 import DAO.AccountDAO;
 import DAO.MessageDAO;
 import java.util.*;
+
  
 
 
@@ -27,6 +31,13 @@ public class SocialMediaController {
 
     AccountDAO accountDAO;
     MessageDAO messageDAO;
+
+    public SocialMediaController() {
+        this.accountService = new AccountService();
+        this.messageService = new MessageService();
+        this.accountDAO = new AccountDAO();
+        this.messageDAO = new MessageDAO();
+    }
     /**
      * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
      * suite must receive a Javalin object from this method.
@@ -97,8 +108,8 @@ public class SocialMediaController {
         Message addedMessage = messageService.addMessage(message);
 
         if(addedMessage != null) {
-            ctx.json(om.writeValueAsString(addedMessage));
-            // ctx.json(addedMessage);
+            // ctx.json(om.writeValueAsString(addedMessage));
+            ctx.json(addedMessage);
         } else {
             ctx.status(400);
         }
@@ -134,6 +145,11 @@ public class SocialMediaController {
         // Retrieve the message ysing the message ID
         Message messageToDelete = messageService.getMessageByID(message_id);
 
+        if (messageToDelete == null) {
+            ctx.result("");
+            return;
+        }
+
         // Delete the message using the message id
         boolean isDeleted = messageService.deleteMessageByID(message_id);
 
@@ -145,27 +161,45 @@ public class SocialMediaController {
     }
 
     private void patchMessageByIdHandler(Context ctx) {
+ 
         // Parse message_id and new message text from the user input 
         int message_id = Integer.parseInt(ctx.pathParam("message_id"));
-        String newMessageText = ctx.body();
+        String requestBody = ctx.body();
+
+        // Parse the request body to extract the message_text
+        JsonObject jsonBody = new JsonParser().parse(requestBody).getAsJsonObject();
+        String newMessageText = jsonBody.get("message_text").getAsString();
+        
+        // Check if the message exists
         Message existingMessage = messageService.getMessageByID(message_id);
+
 
         // Validate the request
         if (newMessageText == null || newMessageText.isBlank() || newMessageText.length() > 255) {
             ctx.status(400);
             return;
         }
-        if (messageService.getMessageByID(message_id) == null) {
+        if (existingMessage == null) {
             ctx.status(400);
         }
 
         // Patch the message using the message ID and the new message text
-        existingMessage.setMessage_text(newMessageText);
+        // existingMessage.setMessage_text(newMessageText);
         // Persist the new message in the database
-        messageService.updateMessageByID(existingMessage.getMessage_text(), message_id);
+        boolean updateSuccess = messageService.updateMessageByID(newMessageText, message_id);
+        if (updateSuccess) {
+            Message updatedMessage = messageDAO.getMessageByID(message_id);
+
+            if (updateSuccess) {
+                ctx.json(updatedMessage);
+            } else {
+                ctx.status(400);
+            }
+        }
+        
 
         // Return as json
-        ctx.json(existingMessage);
+        // ctx.json(existingMessage);
 
     }
 
