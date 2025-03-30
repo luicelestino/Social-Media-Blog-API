@@ -1,5 +1,6 @@
 package DAO;
 import Model.Account;
+import Model.Message;
 import Util.ConnectionUtil;
 
 import java.util.*;
@@ -58,5 +59,32 @@ public class AccountDAO {
         } return null;
     }
 
-    
+    // Retrieve an account by its username
+    public Account getAccountByUsername(String username) {
+        // Establish connection to database
+        Connection connection = ConnectionUtil.getConnection();
+
+        try {
+            // Prepare SQL statement
+            String sql = "SELECT * FROM account WHERE username = ?";
+
+            // Write prepared statement to execute SQL query
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            // Use prepared statement setter to set parameter
+            preparedStatement.setString(1, username);
+
+            // Create result set to store the results of the SQL query
+            ResultSet rs = preparedStatement.executeQuery();
+
+            // Parse SQL data into an object
+            while(rs.next()) {
+                Account account = new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password"));
+                                              
+                return account;
+            }
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+        } return null;
+    }
 }
