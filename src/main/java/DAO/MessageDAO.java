@@ -125,7 +125,66 @@ public class MessageDAO {
 
 
     // Update a message's "message_txt" by its ID
+    public boolean updateMessageByID(String message_text, int message_id) {
+        // Establish connection to database
+        Connection connection = ConnectionUtil.getConnection();
 
+        try {
+            // Prepare the SQL query
+            String sql = "UPDATE message SET message_text = ? WHERE message_id = ?";
+
+            // Create the prepared statement that wille execute the SQL query
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            // Use the prepared statement setters to set parameters
+            preparedStatement.setString(1, message_text);
+            preparedStatement.setInt(2, message_id);
+
+            // Execute the prepared statement
+            // Save the number of rows affected to determine if update was successful or not i.e 0 rows vs 1 row
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if (rowsAffected > 0) {
+                return true;
+            } else {
+                return false;
+            } 
+
+
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
 
     // Retrieve all messages written by a particular user identified by their "account_id"
+    // Retrieve all messages from the "message" table
+    public List<Message> getAllMessagesByAccountID(int account_id) {
+        // Establish the connection to the database
+        Connection connection = ConnectionUtil.getConnection();
+        // Initialize an array list that will store all the messages from the query on the database
+        List<Message> messagesFromAccount = new ArrayList<>();
+
+        try {
+            // Create the SQL statement
+            String sql = "SELECT * FROM message WHERE posted_by = ?";
+
+            // Create prepared statement that will execute the SQL statement 
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            // Use prepared statement setter to set parameter
+            preparedStatement.setInt(1,account_id);
+            // Create the result set that will store the results of the SQL statement
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while(rs.next()) {
+                // Parse the SQL data into an object
+                Message message = new Message(rs.getInt("message_id"), rs.getInt("posted_by"), rs.getString("message_text"),
+                                              rs.getLong("time_posted_epoch"));
+                messagesFromAccount.add(message);
+            }
+
+        } catch(SQLException e) {
+            System.out.println(e.getMessage());
+        } return messagesFromAccount;
+
+    }
 }
