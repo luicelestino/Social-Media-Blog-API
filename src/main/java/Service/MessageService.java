@@ -41,7 +41,17 @@ public class MessageService {
 
     // Use MessageDAO to update a message's text by its ID
     public boolean updateMessageByID(String message_text, int message_id) {
-        return messageDAO.updateMessageByID(message_text, message_id);
+
+        // Check to see if message exists as per business logic requirements
+        // Find message bu accessing MessageDAO method
+        Message messageExists = messageDAO.getMessageByID(message_id);
+
+        if (messageExists != null) {
+            return messageDAO.updateMessageByID(message_text, message_id);
+        }
+        // Return null if no message was found
+        return false;
+        
     }
 
     // Use MessageDAO to retrieve all messages from an account's ID
