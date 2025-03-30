@@ -105,17 +105,24 @@ public class SocialMediaController {
         ObjectMapper om = new ObjectMapper();
         // Create message object from user input
         Message message = om.readValue(jsonString, Message.class);
-        Message addedMessage = messageService.addMessage(message);
+        
 
-        if(addedMessage != null) {
+        // Check if message_text is blank or is more than 255 chars
+        if(message.getMessage_text() == null || message.getMessage_text().isEmpty() || message.getMessage_text().length() > 255) {
             // ctx.json(om.writeValueAsString(addedMessage));
+            ctx.status(400);
+            return;
+        }
+        
+        Message addedMessage = messageService.addMessage(message);
+        // If message was successfully added, return json
+        if(addedMessage != null) {
             ctx.json(addedMessage);
         } else {
             ctx.status(400);
         }
-        
     }
-
+    
     // Handler for get on /messages
     private void getAllMessagesHandler(Context ctx) {
         // Create array list to store all messages
