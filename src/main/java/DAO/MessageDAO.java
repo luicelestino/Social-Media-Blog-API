@@ -106,7 +106,7 @@ public class MessageDAO {
 
         try {
             // Prepare SQL statement
-            String sql = "DELETE * FROM message WHERE message_id = ?";
+            String sql = "DELETE FROM message WHERE message_id = ?";
             
             // Create prepared statement that will execute the SQL query
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
