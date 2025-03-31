@@ -40,19 +40,25 @@ public class AccountDAO {
 
         try {
             // Create SQL statement
-            String sql = "INSERT INTO account (account_id, username, password) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO account (username, password) VALUES (?, ?)";
             // Create prepared statement that will execute the SQL statement
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             // Use prepared statement setters for paramters
-            preparedStatement.setInt(1, account.getAccount_id());
-            preparedStatement.setString(2, account.getUsername());
-            preparedStatement.setString(3, account.getPassword());
+            // preparedStatement.setInt(1, account.getAccount_id());
+            preparedStatement.setString(1, account.getUsername());
+            preparedStatement.setString(2, account.getPassword());
 
             // Execute prepared SQL statement
-            preparedStatement.executeQuery();
-            // Return account object 
-            return account;
+            preparedStatement.executeUpdate();
+
+            ResultSet rs = preparedStatement.getGeneratedKeys();
+
+            if (rs.next()) {
+                int generated_account_id = (int) rs.getLong(1);
+                return new Account(generated_account_id, account.getUsername(), account.getPassword());
+            }
+
         } catch(SQLException e) {
             System.out.println(e.getMessage());
         } return null;
