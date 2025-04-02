@@ -19,8 +19,13 @@ public class MessageService {
         this.messageDAO = messageDAO;
     }
 
-    // Use MessageDAO to create new message
     public Message addMessage(Message message) {
+        // Check if message_text is blank or more than 255 characters
+        if (message.getMessage_text() == null || message.getMessage_text().isEmpty() || message.getMessage_text().length() > 255) {
+            return null; // Return null to indicate validation failure
+        }
+        
+        // If validation passes, create the message via the DAO
         return messageDAO.createMessage(message);
     }
 
@@ -39,21 +44,30 @@ public class MessageService {
         return messageDAO.deleteMessageByID(message_id);
     }
 
-    // Use MessageDAO to update a message's text by its ID
-    public boolean updateMessageByID(String message_text, int message_id) {
-
-        // Check to see if message exists as per business logic requirements
-        // Find message by accessing MessageDAO method
-        Message messageExists = messageDAO.getMessageByID(message_id);
-        // String newMessageText = message_text;
-
-        if (messageExists != null) {
-            // messageExists.setMessage_text(newMessageText);
-            return messageDAO.updateMessageByID(message_text, message_id);
+    // Changed return type to Message so that the method returns the whole message object on update
+    // Prior logic would return the existing message after it was updated to show the changes
+    // Old approach was clunky so this was changed
+    public Message updateMessageByID(String newMessageText, int message_id) {
+        // Validate the new message text
+        if (newMessageText == null || newMessageText.isBlank() || newMessageText.length() > 255) {
+            return null;  
         }
-        // Return null if no message was found
-        return false;
-        
+    
+        // Check if the message exists
+        Message existingMessage = messageDAO.getMessageByID(message_id);
+        if (existingMessage == null) {
+            return null;  
+        }
+    
+        // Proceed to update the message via the DAO
+        boolean updateSuccess = messageDAO.updateMessageByID(newMessageText, message_id);
+        if (updateSuccess) {
+            // If the update is successful, fetch the updated message and return it
+            return messageDAO.getMessageByID(message_id);
+        }
+    
+        // If the update failed, return null
+        return null;
     }
 
     // Use MessageDAO to retrieve all messages from an account's ID

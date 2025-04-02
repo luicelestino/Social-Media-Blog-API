@@ -101,22 +101,17 @@ public class SocialMediaController {
         // Storing user input as a JSON string
         String jsonString = ctx.body();
         
-        // Initialzie object mapper to convert json string to an object
+        // Initialize object mapper to convert JSON string to an object
         ObjectMapper om = new ObjectMapper();
+        
         // Create message object from user input
         Message message = om.readValue(jsonString, Message.class);
         
-
-        // Check if message_text is blank or is more than 255 chars
-        if(message.getMessage_text() == null || message.getMessage_text().isEmpty() || message.getMessage_text().length() > 255) {
-            // ctx.json(om.writeValueAsString(addedMessage));
-            ctx.status(400);
-            return;
-        }
-        
+        // Call the service method to handle message creation and validation
         Message addedMessage = messageService.addMessage(message);
-        // If message was successfully added, return json
-        if(addedMessage != null) {
+    
+        // If message was successfully added, return the message in JSON format
+        if (addedMessage != null) {
             ctx.json(addedMessage);
         } else {
             ctx.status(400);
@@ -168,46 +163,23 @@ public class SocialMediaController {
     }
 
     private void patchMessageByIdHandler(Context ctx) {
- 
-        // Parse message_id and new message text from the user input 
+        // Parse message_id from the path parameter
         int message_id = Integer.parseInt(ctx.pathParam("message_id"));
         String requestBody = ctx.body();
-
-        // Parse the request body to extract the message_text
+    
+        // Parse the request body to extract the new message text
         JsonObject jsonBody = new JsonParser().parse(requestBody).getAsJsonObject();
         String newMessageText = jsonBody.get("message_text").getAsString();
-        
-        // Check if the message exists
-        Message existingMessage = messageService.getMessageByID(message_id);
-
-
-        // Validate the request
-        if (newMessageText == null || newMessageText.isBlank() || newMessageText.length() > 255) {
-            ctx.status(400);
-            return;
+    
+        // Call the service method to handle the update logic
+        Message updatedMessage = messageService.updateMessageByID(newMessageText, message_id);
+    
+        // Return updated message to user if successful
+        if (updatedMessage != null) {
+            ctx.json(updatedMessage);  
+        } else {
+            ctx.status(400);  
         }
-        if (existingMessage == null) {
-            ctx.status(400);
-        }
-
-        // Patch the message using the message ID and the new message text
-        // existingMessage.setMessage_text(newMessageText);
-        // Persist the new message in the database
-        boolean updateSuccess = messageService.updateMessageByID(newMessageText, message_id);
-        if (updateSuccess) {
-            Message updatedMessage = messageDAO.getMessageByID(message_id);
-
-            if (updateSuccess) {
-                ctx.json(updatedMessage);
-            } else {
-                ctx.status(400);
-            }
-        }
-        
-
-        // Return as json
-        // ctx.json(existingMessage);
-
     }
 
     private void getAllMessagesByAccountIdHandler(Context ctx) {
@@ -222,8 +194,5 @@ public class SocialMediaController {
         } else {
             ctx.result("");
         }
-
     }
-
-
 }
